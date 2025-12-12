@@ -1,0 +1,319 @@
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/Library-ui/refs/heads/main/Redzhubui"))()
+
+--// Manox Hub Full Loading Screen by GPT-5
+
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+-- GUI principal
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ChaosFullLoading"
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Fundo com imagem cobrindo tudo
+local Background = Instance.new("ImageLabel")
+BaTABckground.Size = UDim2.new(1, 0, 1, 0)
+Background.Position = UDim2.new(0, 0, 0, 0)
+Background.BackgroundTransparency = 1
+Background.Image = "rbxassetid://139940007638134" -- 🖼️ ID da imagem de fundo
+Background.ImageTransparency = 0
+Background.ScaleType = Enum.ScaleType.Crop
+Background.Parent = ScreenGui
+
+-- Efeito de blur suave
+local Blur = Instance.new("BlurEffect")
+Blur.Size = 12
+Blur.Parent = Lighting
+
+-- 🎵 Som ambiente
+local Sound = Instance.new("Sound")
+Sound.SoundId = "rbxassetid://1841398064" -- coloque aqui o ID do som de fundo
+Sound.Volume = 1
+Sound.Looped = false
+Sound.Parent = workspace
+Sound:Play()
+
+-- Fundo da barra
+local BarBackground = Instance.new("Frame")
+BarBackground.AnchorPoint = Vector2.new(0.5, 0.5)
+BarBackground.Position = UDim2.new(0.5, 0, 0.82, 0)
+BarBackground.Size = UDim2.new(0.5, 0, 0.04, 0)
+BarBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+BarBackground.BorderSizePixel = 0
+BarBackground.BackgroundTransparency = 0.25
+BarBackground.Parent = ScreenGui
+
+-- Barra de progresso
+local ProgressBar = Instance.new("Frame")
+ProgressBar.Size = UDim2.new(0, 0, 1, 0)
+ProgressBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ProgressBar.BorderSizePixel = 0
+ProgressBar.Parent = BarBackground
+
+-- Texto de porcentagem
+local PercentText = Instance.new("TextLabel")
+PercentText.AnchorPoint = Vector2.new(0.5, 0.5)
+PercentText.Position = UDim2.new(0.5, 0, 0.73, 0)
+PercentText.Size = UDim2.new(0, 400, 0, 60)
+PercentText.Text = "Loading... 0%"
+PercentText.TextColor3 = Color3.fromRGB(255, 255, 255)
+PercentText.Font = Enum.Font.GothamBold
+PercentText.TextSize = 36
+PercentText.BackgroundTransparency = 1
+PercentText.Parent = ScreenGui
+
+-- 🕒 8 segundos = 100 etapas -> 0.08s por porcentagem
+for i = 1, 100 do
+	local goal = { Size = UDim2.new(i / 100, 0, 1, 0) }
+	TweenService:Create(ProgressBar, TweenInfo.new(0.08), goal):Play()
+	PercentText.Text = "Loading... " .. i .. "%"
+	task.wait(0.08)
+end
+
+-- Fade-out final (1s)
+TweenService:Create(Background, TweenInfo.new(1), { ImageTransparency = 1 }):Play()
+TweenService:Create(BarBackground, TweenInfo.new(1), { BackgroundTransparency = 1 }):Play()
+TweenService:Create(ProgressBar, TweenInfo.new(1), { BackgroundTransparency = 1 }):Play()
+TweenService:Create(PercentText, TweenInfo.new(1), { TextTransparency = 1 }):Play()
+
+task.wait(1)
+Blur:Destroy()
+ScreenGui:Destroy()
+
+if Sound then
+	TweenService:Create(Sound, TweenInfo.new(1), { Volume = 0 }):Play()
+	task.wait(1)
+	Sound:Destroy()
+end
+
+local Window = redzlib:MakeWindow({
+  Title = "Manox Hub | Halloween Edition",
+  SubTitle = "by jagames94",
+  SaveFolder = "MANOX-HUB"
+})
+
+Window:AddMinimizeButton({
+    Button = { Image = "rbxassetid://85306576124923", BackgroundTransparency = 0 },
+    Corner = { CornerRadius = UDim.new(35, 1) },
+})
+
+local Tab = Window:MakeTab({"audio all", "music"})
+
+---------------------------------------------------------------
+-- Variáveis
+---------------------------------------------------------------
+local selectedAudioID = nil
+local audioLoop = false
+
+-- você vai adicionar sua tabela aqui depois:
+-- local audios = {
+--     {Name = "nome_do_audio", ID = 123},
+-- }
+
+---------------------------------------------------------------
+-- TextBox: Inserir ID manualmente
+---------------------------------------------------------------
+Tab:AddTextBox({
+    Name = "Insira o ID do Áudio ou Música",
+    Description = "Digite o ID do áudio",
+    PlaceholderText = "ID do áudio",
+    ClearTextOnFocus = true,
+
+    Callback = function(value)
+        local num = tonumber(value)
+        if num then
+            selectedAudioID = num
+        else
+            warn("ID inválido!")
+        end
+    end
+})
+
+---------------------------------------------------------------
+-- Dropdown (lista de áudios) — você preenche depois
+---------------------------------------------------------------
+-- criar lista vazia até você colocar os áudios
+local audioNames = {}
+
+-- quando você adicionar sua tabela "audios", essa parte funciona:
+-- for _, audio in ipairs(audios) do
+--     table.insert(audioNames, audio.Name)
+-- end
+
+Tab:AddDropdown({
+    Name = "Selecione o Audio",
+    Description = "Escolha um áudio da lista",
+    Options = audioNames,
+    Default = audioNames[1],
+    Flag = "selected_audio",
+
+    Callback = function(value)
+        -- quando você tiver sua tabela "audios", isso funciona:
+        -- for _, audio in ipairs(audios) do
+        --     if audio.Name == value then
+        --         selectedAudioID = audio.ID
+        --         break
+        --     end
+        -- end
+    end
+})
+
+---------------------------------------------------------------
+-- Seção de Loop
+---------------------------------------------------------------
+Tab:AddSection("Loop de Áudio")
+
+-- Função que toca o áudio em loop
+local function playLoopedAudio()
+    while audioLoop do
+        if selectedAudioID then
+
+            -- SERVER SIDE
+            local gunEvent = game:GetService("ReplicatedStorage"):FindFirstChild("1Gu1nSound1s", true)
+            if gunEvent then
+                gunEvent:FireServer(workspace, selectedAudioID, 1)
+            end
+
+            -- CLIENT SIDE
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://" .. selectedAudioID
+            sound.Parent = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            sound:Play()
+
+        else
+            warn("Nenhum áudio selecionado!")
+        end
+
+        task.wait(0.5) -- delay para evitar overload
+    end
+end
+
+Tab:AddToggle({
+    Name = "Loop Tocar Áudio",
+    Description = "Ativa o loop do áudio",
+    Default = false,
+    Flag = "audio_loop",
+
+    Callback = function(value)
+        audioLoop = value
+        if audioLoop then
+            task.spawn(playLoopedAudio)
+        end
+    end
+})
+
+Tab:AddParagraph("Info", "Loop de tocar áudio (Todos players do server ouvem)")
+
+---------------------------------------------------------------
+-- Função para tocar o áudio apenas uma vez
+---------------------------------------------------------------
+local function playAudio()
+    if selectedAudioID then
+        -- SERVER SIDE
+        local gunEvent = game:GetService("ReplicatedStorage"):FindFirstChild("1Gu1nSound1s", true)
+        if gunEvent then
+            gunEvent:FireServer(workspace, selectedAudioID, 1)
+        end
+
+        -- CLIENT SIDE
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://" .. selectedAudioID
+        sound.Parent = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        sound:Play()
+    else
+        warn("Nenhum áudio selecionado!")
+    end
+end
+
+---------------------------------------------------------------
+-- Botão para tocar o áudio
+---------------------------------------------------------------
+Tab:AddSection("Tocar Áudio")
+
+Tab:AddButton({
+    Name = "Tocar Áudio",
+    Callback = function()
+        playAudio()
+    end
+})
+
+---------------------------------------------------------------
+-- Funções Extras (Estourar ouvido geral)
+---------------------------------------------------------------
+local audioID = 6314880174 -- ID fixo
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Client + Server Sound
+local function Audio_All_ClientSide(ID)
+    local function CheckFolderAudioAll()
+        local FolderAudio = workspace:FindFirstChild("Audio all client")
+        if not FolderAudio then
+            FolderAudio = Instance.new("Folder")
+            FolderAudio.Name = "Audio all client"
+            FolderAudio.Parent = workspace
+        end
+        return FolderAudio
+    end
+
+    local function CreateSound(ID)
+        if type(ID) ~= "number" then
+            warn("Insira um número válido!")
+            return
+        end
+
+        local Folder = CheckFolderAudioAll()
+
+        local Sound = Instance.new("Sound")
+        Sound.SoundId = "rbxassetid://" .. ID
+        Sound.Volume = 1
+        Sound.Looped = false
+        Sound.Parent = Folder
+
+        Sound:Play()
+        task.wait(1)
+        Sound:Destroy()
+    end
+
+    CreateSound(ID)
+end
+
+local function Audio_All_ServerSide(ID)
+    if type(ID) ~= "number" then
+        warn("Insira um número válido!")
+        return
+    end
+
+    local GunSoundEvent = ReplicatedStorage:FindFirstChild("1Gu1nSound1s", true)
+    if GunSoundEvent then
+        GunSoundEvent:FireServer(workspace, ID, 1)
+    end
+end
+
+---------------------------------------------------------------
+-- Toggle Spam
+---------------------------------------------------------------
+Tab:AddToggle({
+    Name = "Estourar ouvido de geral KK",
+    Description = "Toca áudio repetidamente para todos",
+    Default = false,
+    Flag = "audio_spam",
+
+    Callback = function(value)
+        getgenv().Audio_All_loop_fast = value
+
+        while getgenv().Audio_All_loop_fast do
+            Audio_All_ServerSide(audioID)
+
+            task.spawn(function()
+                Audio_All_ClientSide(audioID)
+            end)
+
+            task.wait(0.03) -- super rápido
+        end
+    end
+})
+
+Tab:AddParagraph("Info", "Todos do server ouvem o áudio")
