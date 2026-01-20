@@ -3,9 +3,8 @@ const app = express();
 
 app.use(express.json());
 
-let servers = {}; // memória
+let servers = {};
 
-// ADD / REMOVE
 app.post("/jobid", (req, res) => {
   const { action, username, jobId, placeId } = req.body;
 
@@ -25,9 +24,8 @@ app.post("/jobid", (req, res) => {
   res.json({ ok: true });
 });
 
-// LISTAR
 app.get("/list", (req, res) => {
   res.json(Object.values(servers));
 });
 
-app.listen(3000, () => console.log("Endpoint online"));
+module.exports = app;
